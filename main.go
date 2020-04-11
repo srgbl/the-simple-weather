@@ -7,9 +7,12 @@ import (
 	"os"
 	"net/http"
 	"html/template"
+	"io/ioutil"
 
 	_ "github.com/lib/pq"
 )
+
+var db *sql.DB
 
 func db_init(db *sql.DB) {
 	var err error
@@ -33,9 +36,36 @@ func db_init(db *sql.DB) {
 	FatalOnError(err)
 }
 
-func apiHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "API")
+func getWeather(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	city_id := r.URL.Query().Get("city_id")
+	queryString := fmt.Sprintf("http://api.openweathermap.org/data/2.5/forecast?id=%s&units=metric&appid=%s", city_id, os.Getenv("API_KEY"))
+	resp, err := http.Get(queryString)
+	FatalOnError(err)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	FatalOnError(err)
+	fmt.Fprintf(w, "%s", body)
 }
+
+func getCities(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+
+	query := r.URL.Query().Get("q")
+	fmt.Println(query)
+
+	queryString := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&appid=%s", query, os.Getenv("API_KEY"))
+	resp, err := http.Get(queryString)
+	FatalOnError(err)
+
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	FatalOnError(err)
+	fmt.Fprintf(w, "%s", body)
+}
+
 
 func FatalOnError(err error) {
 	if err != nil {
@@ -44,16 +74,19 @@ func FatalOnError(err error) {
 }
 
 func main() {
+	var err error
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	db, err := sql.Open("postgres", os.Getenv("DATABASE_URL"))
-	FatalOnError(err)
 
+	db, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+	FatalOnError(err)
 	db_init(db)
 
 	templates := template.Must(template.ParseFiles("templates/index.html"))
+
 	http.Handle("/static/",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("static"))))
@@ -64,8 +97,9 @@ func main() {
 		}
 	})
 
-	http.HandleFunc("/api", apiHandler)
+	http.HandleFunc("/api/weather", getWeather)
+	http.HandleFunc("/api/cities", getCities)
 
 	fmt.Println("Serving on port ", port)
-	http.ListenAndServe(":" + port, nil)
+	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
