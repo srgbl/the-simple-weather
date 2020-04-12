@@ -2,10 +2,11 @@
 <head>
 	<title>Погода.{{if .Name}} {{.Name}}{{end}}</title>
 	<link rel="stylesheet" type="text/css" href="/static/main.css" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
 <div class="container">
-	<div class="flex-column mtop">
+	<div class="flex-column">
 	<form action="/" method="post" >
 		<div class="flex-row">
 			<input type="text" 	id="search_box" name="city_name" placeholder="Город">
