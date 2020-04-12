@@ -39,17 +39,23 @@ body {
 	color: #656565;
 }
 
-input {
+input, button {
 	height: 1.8em;
 	font-size: 1em;
 	padding-left: 0.5em;
 	padding-right: 0.5em;
 }
 
-#search_box {
+#search_input {
 	width: 100%;
 	flex-grow: 1;
-	margin-right: 0.5em;
+}
+
+button {
+	width: 3em;
+	border: none;
+	background: url("/static/298865-32.png") no-repeat center center;
+	opacity: 0.6;
 }
 
 .mtop {
