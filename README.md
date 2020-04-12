@@ -20,7 +20,7 @@
 Для запуска понадобится ключ к API [OpenWeather](https://openweathermap.org)
 
 ```sh
-$ go bild
+$ go build
 $ API_KEY=<<your_API_key>> ./simple-weather
 ```
 
