@@ -41,7 +41,7 @@ type Wind struct {
 // Error handler
 func FatalOnError(err error) {
 	if err != nil {
-		log.Fatal("Error", err)
+		log.Fatal("Error:", err)
 	}
 }
 
@@ -106,6 +106,6 @@ func main() {
 
 	http.HandleFunc("/", getWeather)
 
-	log.Println("Serving on port ", port)
+	log.Println("Serving on port", port)
 	log.Fatal(http.ListenAndServe(":" + port, nil))
 }
