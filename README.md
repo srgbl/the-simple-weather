@@ -32,4 +32,5 @@ $ API_KEY=<<your_API_key>> ./simple-weather
 
 ### Демо-версия
 Скрин-каст с примром работы сервиса https://skr.sh/v1ecXgwG7mV?a
+
 Сервис также доступен по дресу https://the-simple-weather.herokuapp.com
