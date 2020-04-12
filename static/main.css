@@ -1,6 +1,7 @@
 body {
 	font-family: Arial, Helvetica, sans-serif;
 	font-size: 24px;
+	color: #454545;
 }
 
 .container {
@@ -32,13 +33,20 @@ body {
 	color: #ed6e6e;
 }
 
+.grey {
+	color: #656565;
+}
+
 input {
-	height: 2em;
+	height: 1.8em;
+	font-size: 1em;
 }
 
 #search_box {
 	width: 100%;
 	flex-grow: 1;
+	margin-right: 0.5em;
+	padding-left: 0.5em;
 }
 
 .mtop {

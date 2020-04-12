@@ -2,7 +2,6 @@
 <head>
 	<title>Погода.{{if .Name}} {{.Name}}{{end}}</title>
 	<link rel="stylesheet" type="text/css" href="/static/main.css" />
-	<script src="/static/scripts.js"></script>
 </head>
 <body>
 <div class="container">
@@ -10,19 +9,19 @@
 	<form action="/" method="post" >
 		<div class="flex-row">
 			<input type="text" 	id="search_box" name="city_name" placeholder="Город">
-			<input type="submit" value="Найти">
+			<input type="submit" class="grey" value="Найти">
 		</div>
 	</form>
 	{{if .Name}}
 	<div class="text_x2">{{.Name}}</div>
 	<div>{{(index .Weather 0).Description}}</div>
 	<div class="flex-row mtop">
-		<span class="text_x3">{{if (gt .Params.Temperature 0.0)}}+{{end}}{{printf "%.0f" .Params.Temperature}} &deg;</span>
+		<span class="text_x3">{{if (gt .Params.Temperature 0.0)}}+{{end}}{{printf "%.0f" .Params.Temperature}}&deg;</span>
 		<img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png">
 	</div>
-	<div class="mtop">Ветер {{.Wind.Speed}} м/с</div>
-	<div>Влажность {{.Params.Humidity}}%</div>
-	<div>Давление {{.Params.Pressure}} мм.рт.ст.</div>
+	<div class="grey mtop">Ветер {{.Wind.Speed}} м/с</div>
+	<div class="grey">Влажность {{.Params.Humidity}}%</div>
+	<div class="grey">Давление {{.Params.Pressure}} мм.рт.ст.</div>
 	{{else}}
 	<div class="error">Город «{{.NameNotFound}}» не найден</div>
 	{{end}}
