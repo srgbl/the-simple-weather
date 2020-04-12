@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"database/sql"
 	"log"
 	"os"
 	"net/http"
+	"encoding/json"
 	"html/template"
-	"io/ioutil"
 
+	"database/sql"
 	_ "github.com/lib/pq"
 )
 
@@ -36,34 +36,85 @@ func db_init(db *sql.DB) {
 	FatalOnError(err)
 }
 
-func getWeather(w http.ResponseWriter, r *http.Request) {
+func getWeather2(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	city_id := r.URL.Query().Get("city_id")
 	queryString := fmt.Sprintf("http://api.openweathermap.org/data/2.5/forecast?id=%s&units=metric&appid=%s", city_id, os.Getenv("API_KEY"))
 	resp, err := http.Get(queryString)
 	FatalOnError(err)
-
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	FatalOnError(err)
-	fmt.Fprintf(w, "%s", body)
+
+//	body, err := ioutil.ReadAll(resp.Body)
+//	FatalOnError(err)
+//	fmt.Fprintf(w, "%s", body)
 }
 
-func getCities(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+type cityInfo struct {
+	Cod 			int			`json:"cod"`
+	Name			string		`json:"name"`
+	Weather			[]Weather	`json:"weather"`
+	Params			Params		`json:"main"`
+	Wind			Wind		`json:"wind"`
+	NameNotFound 	string
+}
 
-	query := r.URL.Query().Get("q")
-	fmt.Println(query)
+type Weather struct {
+	Main			string	`json:"main"`
+	Description 	string	`json:"description"`
+	Icon			string	`json:"icon"`
+}
 
-	queryString := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&appid=%s", query, os.Getenv("API_KEY"))
+type Params struct {
+	Temperature		float64	`json:"temp"`
+	FeelsLike		float64	`json:"feels_like"`
+	Humidity		int		`json:"humidity"`
+	Pressure		int		`json:"pressure"`
+}
+
+type Wind struct {
+	Speed			float64	`json:"speed"`
+}
+
+
+func getWeather(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	var err error
+
+	err = r.ParseForm()
+	FatalOnError(err)
+
+	query := "Moscow"
+	if _, e := r.Form["city_name"]; e {
+		query = r.Form["city_name"][0]
+	}
+	log.Println(query)
+
+	queryString := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&lang=ru&appid=%s", query, os.Getenv("API_KEY"))
 	resp, err := http.Get(queryString)
 	FatalOnError(err)
-
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	FatalOnError(err)
-	fmt.Fprintf(w, "%s", body)
+
+	cityInfo := &cityInfo{}
+
+	if resp.StatusCode == http.StatusOK {
+		/*
+		bodyBytes, err := ioutil.ReadAll(resp.Body)
+		FatalOnError(err)
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
+		*/
+
+		err = json.NewDecoder(resp.Body).Decode(cityInfo)
+		FatalOnError(err)
+	}
+
+	cityInfo.Params.Pressure = int(float64(cityInfo.Params.Pressure) * 0.75006)
+	templates := template.Must(template.ParseFiles("templates/index.html"))
+	if err := templates.ExecuteTemplate(w, "index.html", cityInfo); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 
@@ -85,20 +136,15 @@ func main() {
 	FatalOnError(err)
 	db_init(db)
 
-	templates := template.Must(template.ParseFiles("templates/index.html"))
-
 	http.Handle("/static/",
 		http.StripPrefix("/static/",
 			http.FileServer(http.Dir("static"))))
 
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		if err := templates.ExecuteTemplate(w, "index.html", nil); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
+	http.HandleFunc("/w", func(w http.ResponseWriter, r *http.Request) {
+
 	})
 
-	http.HandleFunc("/api/weather", getWeather)
-	http.HandleFunc("/api/cities", getCities)
+	http.HandleFunc("/", getWeather)
 
 	fmt.Println("Serving on port ", port)
 	log.Fatal(http.ListenAndServe(":" + port, nil))

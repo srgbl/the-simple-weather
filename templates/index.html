@@ -1,16 +1,28 @@
 <html>
 <head>
-	<title>Погода</title>
+	<title>Погода.{{ .Name}}</title>
 	<link rel="stylesheet" type="text/css" href="/static/main.css" />
 	<script src="/static/scripts.js"></script>
 </head>
 <body>
-<div class="container">
-	<div class="flex-column">
-		<input type="text" id="search_box" class="" placeholder="Город">
-		<div id="weather_img" class="">Картинка</div>
-		<div id="temperature" class="">Температура</div>
-	</div>
+<div class="container flex-column">
+	<form action="/" method="post" class="mbot2em">
+		<input type="text" name="city_name" placeholder="Город">
+		<input type="submit" value="Найти">
+	</form>
+	{{if .NameNotFound}}
+		<div class="error">Город «{{.NameNotFound}}» не найден</div>
+	{{else}}
+		<div class="text_x2">{{.Name}}</div>
+		<div>{{(index .Weather 0).Description}}</div>
+		<div class="flex-row">
+			<span class="text_x3">{{if (gt .Params.Temperature 0.0)}}+{{end}}{{printf "%.0f" .Params.Temperature}} &deg;</span>
+			<img src="http://openweathermap.org/img/wn/{{(index .Weather 0).Icon}}@2x.png">
+		</div>
+		<div>Ветер {{.Wind.Speed}} м/с</div>
+		<div>Влажность {{.Params.Humidity}}%</div>
+		<div>Давление {{.Params.Pressure}} мм.рт.ст.</div>
+	{{end}}
 </div>
 </body>
 </html>

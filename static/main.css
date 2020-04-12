@@ -1,9 +1,40 @@
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+}
 .container {
 	width: 320px;
 	margin: 0 auto;
-	padding-top: 40px;
+	padding-top: 3em;
 }
 
 .flex-column {
+	display: flex;
 	flex-direction: column;
+}
+
+.flex-row {
+	display: flex;
+	flex-flow: row nowrap;
+	justify-content: left;
+	align-items: center;
+}
+
+.text_x3 {
+	font-size: 3em;
+}
+
+.text_x2 {
+	font-size: 2em;
+}
+
+.error {
+	color: indianred;
+}
+
+input {
+	height: 2em;
+}
+.mbot2em {
+	margin-bottom: 2em;
 }
